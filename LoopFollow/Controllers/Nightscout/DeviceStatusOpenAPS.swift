@@ -47,7 +47,7 @@ extension MainViewController {
             var enactedISF: HKQuantity?
             if let enactedISFValue = enactedOrSuggested["ISF"] as? Double {
                 var determinedISFUnit: HKUnit = .milligramsPerDeciliter
-                if enactedISFValue < 15 {
+                if enactedISFValue < 16 {
                     determinedISFUnit = .millimolesPerLiter
                 }
                 enactedISF = HKQuantity(unit: determinedISFUnit, doubleValue: enactedISFValue)
@@ -159,10 +159,22 @@ extension MainViewController {
                 infoManager.updateInfoData(type: .tdd, value: tddMetric)
             }
 
+
+            let predBGsData: [String: AnyObject]? = {
+                if let enacted = lastLoopRecord["suggested"] as? [String: AnyObject],
+                   let predBGs = enacted["predBGs"] as? [String: AnyObject] {
+                    return predBGs
+                } else if let suggested = lastLoopRecord["enacted"] as? [String: AnyObject],
+                          let predBGs = suggested["predBGs"] as? [String: AnyObject] {
+                    return predBGs
+                }
+                return nil
+            }()
+
             let predictioncolor = UIColor.systemGray
             PredictionLabel.textColor = predictioncolor
             topPredictionBG = UserDefaultsRepository.minBGScale.value
-            if let predbgdata = enactedOrSuggested["predBGs"] as? [String: AnyObject] {
+            if let predbgdata = predBGsData {
                 let predictionTypes: [(type: String, colorName: String, dataIndex: Int)] = [
                     ("ZT", "ZT", 12),
                     ("IOB", "Insulin", 13),
